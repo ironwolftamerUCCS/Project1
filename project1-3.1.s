@@ -7,7 +7,7 @@
 
 .text
 
-# V3.0 replaces the write_string with puts and adds the putchar function
+# V3.1 replaces the read_string with gets and adds the getchar function
 
 main:
 	# main() prolog
