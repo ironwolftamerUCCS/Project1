@@ -17,7 +17,7 @@ int gets(char *s)
   } while (last_read != '\n');
 
   p[-1] = 0;
-  return s-p;
+  return s-p1
 }
 
 int puts(const char *s)

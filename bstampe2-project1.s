@@ -25,13 +25,11 @@ main:
 	# Read up to 100 characters from the terminal (stdin)
 	# Setup args
 	mv a0, sp
-	addi a1, zero, 100
 	# Call read function
-	jal read_string
+	jal gets
 
 	# Write the just read characters to the terminal (stdout)
 	# Setup args
-	addi a1, a0, 0 
 	mv a0, sp
 	# Call write function
 	jal puts
@@ -42,36 +40,36 @@ main:
 	ret
 	
 puts:
-    #a0 = prompt
-
 	# prolog
-	addi sp, sp, -4
+	addi sp, sp, -8
+	sw sp, 4(sp)
 	sw ra, 0(sp)
 
 	mv s1, a0
 
 	#body
-	WHILE:
+	PWHILE:
         mv a0, s1
         lb t0, 0(a0)
-		beqz t0, DONE
+		beqz t0, PDONE
         addi s1, s1, 1
 		jal putchar
 		lb t0, 0(a0)
-		blt t0, zero, ERROR
-		j WHILE
+		blt t0, zero, PERROR
+		j PWHILE
 
-	ERROR:
+	PERROR:
 		li a0, -1
-		j EPI
+		j PEPI
 
-	DONE:
+	PDONE:
 		li a0, 0
 
 	#epilog
-	EPI:
+	PEPI:
 		lw ra, 0(sp)
-		addi sp, sp, 4
+		lw sp, 4(sp)
+		addi sp, sp, 8
 		ret
 
 putchar:
@@ -91,13 +89,62 @@ putchar:
 	ret
 	
     
-read_string:
-    mv a2, a1
-    mv a1, a0
+gets:
+	#prolog
+	addi sp, sp, -8
+	sw sp, 4(sp)
+	sw ra, 0(sp)
+
+	#body
+    mv t0, a0
+	li t1, 0
+
+	WHILE:
+		jal getchar
+		lb t1, 0(a0)
+		blt t1, zero, ERROR
+		sb t1, 0(t0)
+		addi t0, t0, 1
+		li t2, 10
+		beq t1, t2, DONE
+		mv a0, t0
+		j WHILE
+
+	ERROR:
+		mv a0, t1
+		j EPI
+
+	DONE: 
+		addi t0, t0, -1
+		li t1, 0
+		sb t1, 0(t0)
+		sub a0, a0, t0
+
+	#epilog
+	EPI:
+		lw ra, 0(sp)
+		lw sp, 4(sp)
+		addi sp, sp, 8
+		ret
+
+
+
+getchar:
+	#prolog
+	addi sp, sp, -4
+	sw a0, 0(sp)
+
+	mv a1, a0
+	li a2, 1
     li a7, __NR_READ
     li a0, STDIN
-    ecall
-    ret
+    ecall 
+ 
+	#epilog
+	lw a0, 0(sp)
+	addi sp, sp, 4
+	ret
+	
 
 .data
 prompt:   .ascii  "Enter a message: "
