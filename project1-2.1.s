@@ -18,8 +18,8 @@ main:
 
 	# Write the prompt to the terminal (stdout)
 	# Setup args
-	addi  a0, zero, prompt_end - prompt
-	la a1, prompt
+	la a0, prompt
+	addi  a1, zero, prompt_end - prompt
 	# Call write function
 	jal write_string
 
@@ -32,8 +32,8 @@ main:
 
 	# Write the just read characters to the terminal (stdout)
 	# Setup args
-	# a0 is already properly set. The old line would go from addi a2, a0, 0 to addi a0, a0, 0 but that is redundent 
-	mv a1, sp
+	addi a1, a0, 0 
+	mv a0, sp
 	# Call write function
 	jal write_string
 
@@ -43,7 +43,8 @@ main:
 	ret
 	
 write_string:
-    mv a2, a0
+    mv a2, a1
+	mv a1, a0
     li a7, __NR_WRITE
     li a0, STDOUT
     ecall 
